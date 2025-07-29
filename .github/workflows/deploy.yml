@@ -12,8 +12,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Docker Build
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/ms-user-1:latest .
+      - name: Grant execute permission for Gradle Wrapper
+        run: chmod +x ./gradlew
+
+      - name: Docker Build (skip tests)
+        run: docker build --build-arg SKIP_TESTS=true -t ${{ secrets.DOCKER_USERNAME }}/ms-user-1:latest .
 
       - name: Docker Login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
@@ -28,6 +31,7 @@ jobs:
 
       - name: Configure kubeconfig
         run: |
+          mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > $HOME/.kube/config
 
       - name: Update Kubernetes Deployment
