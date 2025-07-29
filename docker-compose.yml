@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  ms-user:
+    build: .
+    container_name: ms_user
+    ports:
+      - "8081:8081"
+    networks:
+      - ms-network
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+
+networks:
+  ms-network:
+    external: true
