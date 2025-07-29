@@ -29,7 +29,7 @@ public class UserController {
         return userService.getById(id);
     }
 
-    @GetMapping
+    @GetMapping("/by-name")
     public User getByName(@RequestParam String name) {
         return userService.getByName(name);
     }
