@@ -24,16 +24,4 @@ jobs:
       - name: Docker Push
         run: docker push ${{ secrets.DOCKER_USERNAME }}/ms-user-1:latest
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
 
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > $HOME/.kube/config
-
-      - name: Update Kubernetes Deployment
-        run: |
-          kubectl set image deployment/ms-user ms-user=${{ secrets.DOCKER_USERNAME }}/ms-user-1:latest
