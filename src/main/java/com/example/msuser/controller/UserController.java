@@ -33,4 +33,10 @@ public class UserController {
     public User getByName(@RequestParam String name) {
         return userService.getByName(name);
     }
+
+    @GetMapping("/hello")
+    public String getHello(){
+        return "Hello world";
+    }
+
 }
