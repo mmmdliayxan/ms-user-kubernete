@@ -44,8 +44,8 @@ public class UserController {
         return "Hello matrix";
     }
 
-    @GetMapping("/test2")
-    public String test2(){
+    @GetMapping("/test3")
+    public String test3(){
         return "Hello matrix, hello kubernete";
     }
 
