@@ -19,8 +19,17 @@ spec:
             - containerPort: 8081
           env:
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://shared-postgres:5432/userdb
+              valueFrom:
+                configMapKeyRef:
+                  name: ms-user-config
+                  key: SPRING_DATASOURCE_URL
             - name: SPRING_DATASOURCE_USERNAME
-              value: postgres
+              valueFrom:
+                configMapKeyRef:
+                  name: ms-user-config
+                  key: SPRING_DATASOURCE_USERNAME
             - name: SPRING_DATASOURCE_PASSWORD
-              value: password
+              valueFrom:
+                secretKeyRef:
+                  name: ms-user-secret
+                  key: SPRING_DATASOURCE_PASSWORD
