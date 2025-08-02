@@ -20,6 +20,10 @@ spec:
           image: docker.io/mmmdliayxan321/ms-user-1:latest
           ports:
             - containerPort: 8081
+          volumeMounts:
+            - name: logging-config-volume
+              mountPath: /app/config/logging.json
+              subPath: logging.json
           env:
             - name: SPRING_DATASOURCE_URL
               valueFrom:
@@ -36,3 +40,10 @@ spec:
                 secretKeyRef:
                   name: ms-user-secret
                   key: SPRING_DATASOURCE_PASSWORD
+      volumes:
+        - name: logging-config-volume
+          configMap:
+            name: logging-config
+            items:
+              - key: logging.json
+                path: logging.json
