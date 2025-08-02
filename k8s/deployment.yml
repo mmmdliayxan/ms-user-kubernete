@@ -47,3 +47,25 @@ spec:
             items:
               - key: logging.json
                 path: logging.json
+
+---
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ms-user-expiry-check
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: expiry-checker
+              image: curlimages/curl:latest
+              args:
+                - curl
+                - -X
+                - POST
+                - http://ms-user:8081/internal/check-user-expiry
+          restartPolicy: OnFailure

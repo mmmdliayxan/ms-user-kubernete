@@ -4,6 +4,7 @@ package com.example.msuser.controller;
 import com.example.msuser.entity.User;
 import com.example.msuser.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,6 +48,12 @@ public class UserController {
     @GetMapping("/test3")
     public String test3(){
         return "Hello matrix, hello kubernete";
+    }
+
+    @PostMapping("/check-user-expiry")
+    public ResponseEntity<String> triggerExpiryCheck() {
+        userService.checkExpiredUsersAndNotify();
+        return ResponseEntity.ok("User expiry check triggered successfully");
     }
 
 }
