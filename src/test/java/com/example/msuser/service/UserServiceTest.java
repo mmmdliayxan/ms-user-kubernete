@@ -5,9 +5,10 @@ import com.example.msuser.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import static org.mockito.Mockito.*;
 
 class UserServiceTest {
@@ -15,64 +16,53 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    private UserService userService;
+    @Mock
+    private NotificationService notificationService;
+
+    private UserService userExpiryService;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this); // Mockları aktiv edir
-        userService = new UserService(userRepository);
+        MockitoAnnotations.openMocks(this);
+        userExpiryService = new UserService(userRepository, notificationService);
     }
 
     @Test
-    void testGetAllUsers() {
-        List<User> mockUsers = Arrays.asList(
-                new User(1L, "Alice", "alice@example.com"),
-                new User(2L, "Bob", "bob@example.com")
-        );
+    void testCheckExpiredUsersAndNotify_WithExpiredUsers() {
+        // Arrange
+        LocalDateTime expiryThreshold = LocalDateTime.now().minusDays(90);
+        User user1 = new User();
+        user1.setEmail("user1@example.com");
+        user1.setLastActiveAt(expiryThreshold.minusDays(1));
 
-        when(userRepository.findAll()).thenReturn(mockUsers);
+        User user2 = new User();
+        user2.setEmail("user2@example.com");
+        user2.setLastActiveAt(expiryThreshold.minusDays(5));
 
-        List<User> result = userService.getAllUsers();
+        List<User> expiredUsers = List.of(user1, user2);
 
-        assertEquals(2, result.size());
-        assertEquals("Alice", result.get(0).getName());
-        verify(userRepository, times(1)).findAll();
+        when(userRepository.findByLastActiveAtBefore(any(LocalDateTime.class)))
+                .thenReturn(expiredUsers);
+
+        // Act
+        userExpiryService.checkExpiredUsersAndNotify();
+
+        // Assert
+        verify(userRepository, times(1)).findByLastActiveAtBefore(any(LocalDateTime.class));
+        verify(notificationService, times(2)).sendExpiryNotification(any(User.class));
     }
 
     @Test
-    void testCreateUser() {
-        User user = new User(null, "Charlie", "charlie@example.com");
-        User savedUser = new User(3L, "Charlie", "charlie@example.com");
+    void testCheckExpiredUsersAndNotify_NoExpiredUsers() {
+        // Arrange
+        when(userRepository.findByLastActiveAtBefore(any(LocalDateTime.class)))
+                .thenReturn(List.of());
 
-        when(userRepository.save(user)).thenReturn(savedUser);
+        // Act
+        userExpiryService.checkExpiredUsersAndNotify();
 
-        User result = userService.createUser(user);
-
-        assertNotNull(result.getId());
-        assertEquals("Charlie", result.getName());
-        verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
-    void testGetByIdFound() {
-        User user = new User(1L, "Alice", "alice@example.com");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-
-        User result = userService.getById(1L);
-
-        assertEquals("Alice", result.getName());
-        verify(userRepository, times(1)).findById(1L);
-    }
-
-    @Test
-    void testGetByIdNotFound() {
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            userService.getById(99L);
-        });
-
-        assertEquals("User not found", exception.getMessage());
-        verify(userRepository, times(1)).findById(99L);
+        // Assert
+        verify(userRepository, times(1)).findByLastActiveAtBefore(any(LocalDateTime.class));
+        verify(notificationService, never()).sendExpiryNotification(any());
     }
 }

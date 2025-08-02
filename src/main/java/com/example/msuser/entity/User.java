@@ -3,6 +3,8 @@ package com.example.msuser.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -16,4 +18,6 @@ public class User {
 
     private String name;
     private String email;
+
+    private LocalDateTime lastActiveAt;
 }
